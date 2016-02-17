@@ -13,7 +13,7 @@ DownRadio
   
 ``` bash
 $ git clone git@github.com:k-dylan/downRadio.git
-$ cd webpack-demos
+$ cd DownRadio
 $ npm install
 $ npm start
   ```
