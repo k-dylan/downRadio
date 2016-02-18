@@ -7,7 +7,8 @@ var later = require('later');
 
 var terminalTypeCbb = 515104503;
 var radioDir = "./src/"; // 音频存储位置
-
+var hour = 23; // 定时执行 小时
+var minute = 30; // 定时执行 分钟
 
 
 // 初始化目录，如果存储位置文件夹不存在，则创建
@@ -88,7 +89,7 @@ function downRadio() {
 
 later.date.localTime();
 // 定时任务
-var basic = [{h: [23], m: [33]}];
+var basic = [{h: [hour], m: [minute]}];
 
 var sched = {
 	schedules : basic
