@@ -1,5 +1,4 @@
 
-
 var querystring = require('querystring'); 
 var request = require('request');
 var fs = require('fs');
@@ -64,6 +63,7 @@ function getDownSrc(item, callback) {
 function downRadio() {
 	init();
 	console.log('读取数据列表');
+	
 	request(getDataUrl() ,{timeout: 5000 },function (err, res, body) {
 		if(err){
 			if(err.code == 'ETIMEDOUT'){
@@ -76,6 +76,7 @@ function downRadio() {
 		var radiolist = eval(body);
 		
 		var item = radiolist.programs[0];
+		
 		console.log('找到最新的音频：' + item.programName);
 		console.log('开始获取此音频的下载地址！');
 		// 获取下载连接
@@ -92,7 +93,7 @@ function downRadio() {
 					
 					var contentLength = parseInt(response.headers['content-length'], 10);
 					var stream = fs.createWriteStream(radioDir + item.programName + ".m4a");
-					var currentLength = 0;
+
 					
 					// 进度显示
 					var bar = new ProgressBar('正在下载： [:bar] :percent 剩余时间：:etas', {
@@ -104,7 +105,6 @@ function downRadio() {
 					response.on('data', function (chunk) {
 						stream.write(chunk);
 						bar.tick(chunk.length);
-						// console.log('已下载：' + Math.floor(currentLength * 100 / contentLength) + '%')	
 					})
 					
 					response.on('end', function () {
@@ -112,7 +112,6 @@ function downRadio() {
 						console.log('下载完成！');
 					})
 				})
-				// .pipe(fs.createWriteStream(radioDir + item.programName + ".m4a"));
 		})
 	})
 }
