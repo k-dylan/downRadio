@@ -4,6 +4,7 @@ var querystring = require('querystring');
 var request = require('request');
 var fs = require('fs');
 var later = require('later');
+var ProgressBar = require('progress');
 
 var terminalTypeCbb = 515104503;
 var radioDir = "./src/"; // 音频存储位置
@@ -40,8 +41,8 @@ function getList (obj) {
 }
 // 根据programId组合radio下载地址
 function getRadioUrl (programId) {
-    var url="http://bk2.radio.cn/mms4/videoPlay/getVodProgramPlayUrlJson.jspa?programId="+programId+"&programVideoId=0&videoType=PC&terminalType="+terminalTypeCbb+"&dflag=1";//new
-   	return url;
+	var url="http://bk2.radio.cn/mms4/videoPlay/getVodProgramPlayUrlJson.jspa?programId="+programId+"&programVideoId=0&videoType=PC&terminalType="+terminalTypeCbb+"&dflag=1";//new
+	return url;
 }
 // 获取下载连接
 function getDownSrc(item, callback) {
@@ -63,9 +64,14 @@ function getDownSrc(item, callback) {
 function downRadio() {
 	init();
 	console.log('读取数据列表');
-	request(getDataUrl() ,function (err, res, body) {
-		if(err)
-			return console.error(err.msg);
+	request(getDataUrl() ,{timeout: 5000 },function (err, res, body) {
+		if(err){
+			if(err.code == 'ETIMEDOUT'){
+				console.error('连接超时，重试')
+				return downRadio();				
+			}
+			return console.error(err);			
+		}
 
 		var radiolist = eval(body);
 		
@@ -77,15 +83,42 @@ function downRadio() {
 			if(err)
 				return console.log(err.msg);
 			console.log('已经找到下载地址为：'+ src);
-			console.log('开始下载！');
 			// 下载Radio
-			request(src)
-				.pipe(fs.createWriteStream(radioDir + item.programName + ".m4a"));
+			request.get(src)
+				.on('response', function (response) {
+					if(response.statusCode != 200)
+						return false; // 连接 失败
+					console.log('连接成功，开始下载！');
+					
+					var contentLength = parseInt(response.headers['content-length'], 10);
+					var stream = fs.createWriteStream(radioDir + item.programName + ".m4a");
+					var currentLength = 0;
+					
+					// 进度显示
+					var bar = new ProgressBar('正在下载： [:bar] :percent 剩余时间：:etas', {
+						complete: '=',
+						incomplete: ' ',
+						width: 20,
+						total: contentLength	
+						})
+					response.on('data', function (chunk) {
+						stream.write(chunk);
+						bar.tick(chunk.length);
+						// console.log('已下载：' + Math.floor(currentLength * 100 / contentLength) + '%')	
+					})
+					
+					response.on('end', function () {
+						stream.end();
+						console.log('下载完成！');
+					})
+				})
+				// .pipe(fs.createWriteStream(radioDir + item.programName + ".m4a"));
 		})
 	})
 }
 
 
+downRadio();
 
 later.date.localTime();
 // 定时任务
