@@ -8,7 +8,7 @@ DownRadio
 ---
 
 
-1. [node](http://nodejs.org/);
+1. 安装 [node](http://nodejs.org/);
 2. clone这个仓库到文件夹
   
 ``` bash

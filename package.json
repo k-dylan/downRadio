@@ -1,10 +1,9 @@
 {
   "name": "downRadio",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "下载中央广播电台中国之声，新闻和报纸摘要",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
   },
   "author": "dylan",
